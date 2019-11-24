@@ -1,0 +1,56 @@
+<!-- client side -->
+
+<!doctype html>
+<html>
+
+<!-- HTML HEAD -->
+<head>
+	<title>Line Chart</title>
+	<!-- Source for Canvas JS - points to the web - needs internet -->
+	<!-- Source for Socket.io - this one is local -->
+	<script src="/socket.io/socket.io.js"></script>
+
+	<style>
+  	canvas{
+  		-moz-user-select: none;
+  		-webkit-user-select: none;
+  		-ms-user-select: none;
+  	}
+	</style>
+</head>
+
+<body>
+	<!-- HTML layout -->
+  <h1>Smart Key System </h1> <br>
+  <p id="demo">Recent Accesses </p>
+	<div id="message_disp"></div>
+	
+
+	<!-- Script to handle charting -->
+	
+
+	<!-- Script to handle socket and also to update chart datapoints -->
+	<script>
+    var timestamp;
+    var deviceID;
+    var temperature;
+		var socket = io();
+		socket.on('message', function(msg){
+			var x = document.getElementById("demo");
+      		var newp = "Timestamp: " + msg[0] + " FobID:  " + msg[1] + " HubID: " + msg[2];
+      		var print = x.innerHTML;
+      		//var newline = ;
+      		var print = print + "<br />" + newp;
+			document.getElementById("demo").innerHTML = print;
+      // Parse received message from server
+      console.log(msg);
+			//document.getElementById("message_disp").innerHTML =  "Timestamp: " + msg[0] + " FobID:  " + msg[1] + " HubID " + msg[2];
+
+			// Update data array
+
+		});
+	</script>
+
+</body>
+
+</html>

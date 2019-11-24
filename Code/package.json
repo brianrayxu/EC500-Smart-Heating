@@ -1,0 +1,19 @@
+{
+  "name": "ec500-smart-heating",
+  "version": "1.0.0",
+  "description": "<center>State Charts 1</center>\r <center><img src=\"./Images/IMG-0063.JPG\" width=\"70%\" /></center>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brianrayxu/EC500-Smart-Heating.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brianrayxu/EC500-Smart-Heating/issues"
+  },
+  "homepage": "https://github.com/brianrayxu/EC500-Smart-Heating#readme"
+}
