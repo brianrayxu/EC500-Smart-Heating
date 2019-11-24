@@ -284,7 +284,7 @@ void app_main()
 
 
     xTaskCreate(tx_task, "uart_tx_task", 1024*2, NULL, configMAX_PRIORITIES, NULL);
-    xTaskCreate(rx_task, "uart_rx_task", 1024*2, NULL, configMAX_PRIORITIES, NULL);
+  //  xTaskCreate(rx_task, "uart_rx_task", 1024*2, NULL, configMAX_PRIORITIES, NULL);
     xTaskCreate(Post_HTTP_hub, "Post_HTTP_hub", 1024*4, NULL, configMAX_PRIORITIES-1, NULL);
     xTaskCreate(accessGranted, "accessGranted", 1024, NULL, configMAX_PRIORITIES-2, NULL);
     xTaskCreate(NotaccessGranted, "NotaccessGranted", 1024, NULL, configMAX_PRIORITIES-2, NULL);

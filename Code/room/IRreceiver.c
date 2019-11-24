@@ -149,6 +149,21 @@ static void tx_task()
       vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
+static windowControl()
+{
+
+}
+
+static thermistorRead()
+{
+
+
+}
+
+static lightControl()
+{
+
+}
 
 
 
