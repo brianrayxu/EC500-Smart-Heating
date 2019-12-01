@@ -1,11 +1,11 @@
 /* RMT transmit example
-
-This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-Unless required by applicable law or agreed to in writing, this
-software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-CONDITIONS OF ANY KIND, either express or implied.
-*/
+ 
+ This example code is in the Public Domain (or CC0 licensed, at your option.)
+ 
+ Unless required by applicable law or agreed to in writing, this
+ software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ CONDITIONS OF ANY KIND, either express or implied.
+ */
 #include <stdio.h>
 #include "sdkconfig.h"
 #include "driver/ledc.h"
@@ -22,8 +22,8 @@ CONDITIONS OF ANY KIND, either express or implied.
 #include "string.h"
 #include "esp_vfs_dev.h"
 #include "esp_intr_alloc.h"
-//#include "HTTPServer.h"
-//#include "http_post.h"
+#include "HTTPServer.h"
+#include "http_post.h"
 #include "driver/mcpwm.h"
 #include "soc/mcpwm_periph.h"
 #include "driver/gpio.h"
@@ -52,8 +52,8 @@ CONDITIONS OF ANY KIND, either express or implied.
 #define LEDC_TEST_DUTY         (4000)
 #define LEDC_TEST_FADE_TIME    (3000)
 
-#define SERVO_MIN_PULSEWIDTH 500 //Minimum pulse width in microsecond
-#define SERVO_MAX_PULSEWIDTH 2000 //Maximum pulse width in microsecond 2500
+#define SERVO_MIN_PULSEWIDTH 500 //Minimum pulse width in microsecond 500
+#define SERVO_MAX_PULSEWIDTH 1900 //Maximum pulse width in microsecond 2500
 #define SERVO_MAX_DEGREE 180 //Maximum angle in degree upto which servo can rotate
 
 #define DEFAULT_VREF    1100                            //Use adc2_vref_to_gpio() to obtain a better estimate
@@ -73,6 +73,28 @@ static int send_flag = 0;
 
 static int debounce = 0;
 static int RXreceived = 0;
+
+float light_percentage = 0.0;
+bool window = 1;
+
+ledc_timer_config_t ledc_timer = {
+    .duty_resolution = LEDC_TIMER_13_BIT, // resolution of PWM duty
+    .freq_hz = 5000,                      // frequency of PWM signal
+    .speed_mode = LEDC_HS_MODE,           // timer mode
+    .timer_num = LEDC_HS_TIMER,            // timer index
+    .clk_cfg = LEDC_AUTO_CLK,              // Auto select the source clock
+};
+
+ledc_channel_config_t ledc_channel[LEDC_TEST_CH_NUM] = {
+    {
+        .channel    = LEDC_HS_CH0_CHANNEL,
+        .duty       = 0,
+        .gpio_num   = LEDC_HS_CH0_GPIO,
+        .speed_mode = LEDC_HS_MODE,
+        .hpoint     = 0,
+        .timer_sel  = LEDC_HS_TIMER
+    },
+};
 
 static void IRAM_ATTR gpio_isr_handler(void* arg)
 {
@@ -202,14 +224,14 @@ static uint32_t servo_per_degree_init(uint32_t degree_of_rotation)
 /**
  * @brief Configure MCPWM module
  */
-void windowControl(void *arg)
+void windowControl()
 {
     uint32_t angle, count;
     //1. mcpwm gpio initialization
     mcpwm_example_gpio_initialize();
     
     //2. initial mcpwm configuration
-    printf("Configuring Initial Parameters of mcpwm......\n");
+    //printf("Configuring Initial Parameters of mcpwm......\n");
     mcpwm_config_t pwm_config;
     pwm_config.frequency = 50;    //frequency = 50Hz, i.e. for every servo motor time period should be 20ms
     pwm_config.cmpr_a = 0;    //duty cycle of PWMxA = 0
@@ -217,13 +239,21 @@ void windowControl(void *arg)
     pwm_config.counter_mode = MCPWM_UP_COUNTER;
     pwm_config.duty_mode = MCPWM_DUTY_MODE_0;
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &pwm_config);    //Configure PWM0A & PWM0B with above settings
-    while (1) {
-        for (count = 0; count < SERVO_MAX_DEGREE; count++) {
-            angle = servo_per_degree_init(count);
-            mcpwm_set_duty_in_us(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, angle);
-            vTaskDelay(10);     //Add delay, since it takes time for servo to rotate, generally 100ms/60degree rotation at 5V
-        }
+    //while (1) {
+    char str[100];
+    printf("open (0) or close (1)?:\n");
+    gets(str);
+    if (atoi(str) == 0) {  // open
+        window = 0;
+        angle = servo_per_degree_init(SERVO_MAX_DEGREE);
+        mcpwm_set_duty_in_us(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, angle);
+    } else {  // closed
+        window = 1;
+        angle = servo_per_degree_init(0);
+        mcpwm_set_duty_in_us(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, angle);
     }
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    //}
 }
 
 static void print_char_val_type(esp_adc_cal_value_t val_type)
@@ -273,15 +303,22 @@ static void temperatureControl()
         adc_reading /= NO_OF_SAMPLES;
         
         //convert raw input to a temperature
+        /*
+         uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars);              //Convert adc_reading to voltage in mV
+         double resistance = (33000.0/((double)voltage/1000.0)) - 10000.0;                   //calculate resistance across thermistor using voltage divider formula
+         double temperatureKelvin = -(1 / ((log(10000.0/resistance)/3435.0) - (1/298.0)));   //convert resistance across thermistor to Kelvin (T0 = 298K, B = 3435, R0 = 10kohm)
+         printf("%.2f\n", (temperatureKelvin - 273.15));                                                //convert Kelvin to Celsius
+         vTaskDelay(500 / portTICK_RATE_MS);
+         */
         uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars);              //Convert adc_reading to voltage in mV
-        double resistance = (33000.0/((double)voltage/1000.0)) - 10000.0;                   //calculate resistance across thermistor using voltage divider formula
-        double temperatureKelvin = -(1 / ((log(10000.0/resistance)/3435.0) - (1/298.0)));   //convert resistance across thermistor to Kelvin (T0 = 298K, B = 3435, R0 = 10kohm)
-        printf("%.2f\n", (temperatureKelvin - 273.15));                                                //convert Kelvin to Celsius
-        vTaskDelay(1000 / portTICK_RATE_MS);
+        double resistance = ((voltage/1000.000)*(20000.000))/(3.300*(1.000-(voltage/3300.000)));
+        double temp = 1/((1.000/298.000) + (1.000/3435.000) * log(resistance/10000)) - 273.000;
+        printf("%.2f\n", temp);                                                //convert Kelvin to Celsius
+        vTaskDelay(500 / portTICK_RATE_MS);
     }
 }
 
-static void lightControl()
+static void lightInit()
 {
     int ch;
     
@@ -289,13 +326,7 @@ static void lightControl()
      * Prepare and set configuration of timers
      * that will be used by LED Controller
      */
-    ledc_timer_config_t ledc_timer = {
-        .duty_resolution = LEDC_TIMER_13_BIT, // resolution of PWM duty
-        .freq_hz = 5000,                      // frequency of PWM signal
-        .speed_mode = LEDC_HS_MODE,           // timer mode
-        .timer_num = LEDC_HS_TIMER,            // timer index
-        .clk_cfg = LEDC_AUTO_CLK,              // Auto select the source clock
-    };
+    
     // Set configuration of timer0 for high speed channels
     ledc_timer_config(&ledc_timer);
     
@@ -312,16 +343,6 @@ static void lightControl()
      *         then frequency and bit_num of these channels
      *         will be the same
      */
-    ledc_channel_config_t ledc_channel[LEDC_TEST_CH_NUM] = {
-        {
-            .channel    = LEDC_HS_CH0_CHANNEL,
-            .duty       = 0,
-            .gpio_num   = LEDC_HS_CH0_GPIO,
-            .speed_mode = LEDC_HS_MODE,
-            .hpoint     = 0,
-            .timer_sel  = LEDC_HS_TIMER
-        },
-    };
     
     // Set LED Controller with previously prepared configuration
     for (ch = 0; ch < LEDC_TEST_CH_NUM; ch++) {
@@ -330,83 +351,92 @@ static void lightControl()
     
     // Initialize fade service.
     ledc_fade_func_install(0);
-    
-    while (1) {
-        for (int i = 0; i < 10; i++) {
-            printf("%.1f Percent Duty\n", (i/10.0)*100.0);
-            for (ch = 0; ch < LEDC_TEST_CH_NUM; ch++) {
-                ledc_set_duty(ledc_channel[ch].speed_mode, ledc_channel[ch].channel, LEDC_TEST_DUTY*(i/10.0));
-                ledc_update_duty(ledc_channel[ch].speed_mode, ledc_channel[ch].channel);
-            }
-            vTaskDelay(250 / portTICK_RATE_MS);
-        }
-        printf("\n");
+}
+
+static void lightControl()
+{
+    //while (1) {
+    char str[100];
+    printf("Enter number 0-9:\n");
+    gets(str);
+    light_percentage = atoi(str);
+    ledc_set_duty(ledc_channel[0].speed_mode, ledc_channel[0].channel, LEDC_TEST_DUTY*light_percentage);
+    ledc_update_duty(ledc_channel[0].speed_mode, ledc_channel[0].channel);
+    vTaskDelay(100 / portTICK_RATE_MS);
+    //}
+}
+
+static void update()
+{
+    while(1) {
+        lightControl();
+        windowControl();
     }
 }
-/*
- static void rx_task()
- {
- static const char *RX_TASK_TAG = "RX_TASK";
- static int starting = 1;
- esp_log_level_set(RX_TASK_TAG, ESP_LOG_INFO);
- uint8_t* dataR = (uint8_t*) malloc(RX_BUF_SIZE+1);
- 
- char* fob="fobID=";
- char* hub="hubID=";
- char* code="code=";
- 
- char* verifier="T";
- 
- while (1) {
- const int rxBytes = uart_read_bytes(UART_NUM_1, dataR, 7, 1000 / portTICK_RATE_MS);
- 
- int readlen = rxBytes;
- 
- memset(data_post_hub,'\0', sizeof(data_post_hub));
- 
- if (rxBytes > 0 && RXreceived < 1) {
- dataR[rxBytes] = 0;
- // ESP_LOGI(RX_TASK_TAG, "Read %d bytes: '%s'", rxBytes, dataR);
- // ESP_LOG_BUFFER_HEXDUMP(RX_TASK_TAG, dataR, rxBytes, ESP_LOG_INFO);
- 
- if(dataR[0] == 0x54){
- strcat(data_post_hub,fob);
- data_post_hub[6] = dataR[1];
- data_post_hub[7] = dataR[2];
- strcat(data_post_hub,code);
- data_post_hub[13] = dataR[3];
- data_post_hub[14] = dataR[4];
- data_post_hub[15] = dataR[5];
- data_post_hub[16] = dataR[6];
- data_post_hub[17] = dataR[2];
- strcat(data_post_hub, hub);
- strcat(data_post_hub, hub_ID);
- 
- printf("data = %s\n", data_post_hub);
- 
- RXreceived = 1;
- }
- 
- }
- vTaskDelay(100 / portTICK_PERIOD_MS);
- }
- free(dataR);
- 
- }
- */
-/*
- void Post_HTTP_hub(){
- 
- while(1){
- if(RXreceived == 1){
- http_rest_with_url();
- RXreceived = 0;
- }
- vTaskDelay(200 / portTICK_PERIOD_MS);
- }
- 
- }
- */
+
+static void rx_task()
+{
+    static const char *RX_TASK_TAG = "RX_TASK";
+    static int starting = 1;
+    esp_log_level_set(RX_TASK_TAG, ESP_LOG_INFO);
+    uint8_t* dataR = (uint8_t*) malloc(RX_BUF_SIZE+1);
+    
+    char* fob="fobID=";
+    char* hub="hubID=";
+    char* code="code=";
+    
+    char* verifier="T";
+    
+    while (1) {
+        const int rxBytes = uart_read_bytes(UART_NUM_1, dataR, 7, 1000 / portTICK_RATE_MS);
+        
+        int readlen = rxBytes;
+        
+        memset(data_post_hub,'\0', sizeof(data_post_hub));
+        
+        if (rxBytes > 0 && RXreceived < 1) {
+            dataR[rxBytes] = 0;
+            // ESP_LOGI(RX_TASK_TAG, "Read %d bytes: '%s'", rxBytes, dataR);
+            // ESP_LOG_BUFFER_HEXDUMP(RX_TASK_TAG, dataR, rxBytes, ESP_LOG_INFO);
+            
+            if(dataR[0] == 0x54){
+                strcat(data_post_hub,fob);
+                data_post_hub[6] = dataR[1];
+                data_post_hub[7] = dataR[2];
+                strcat(data_post_hub,code);
+                data_post_hub[13] = dataR[3];
+                data_post_hub[14] = dataR[4];
+                data_post_hub[15] = dataR[5];
+                data_post_hub[16] = dataR[6];
+                data_post_hub[17] = dataR[2];
+                strcat(data_post_hub, hub);
+                strcat(data_post_hub, hub_ID);
+                
+                printf("data = %s\n", data_post_hub);
+                
+                RXreceived = 1;
+            }
+            
+        }
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+    free(dataR);
+    
+}
+
+
+void Post_HTTP_hub(){
+    
+    while(1){
+        if(RXreceived == 1){
+            http_rest_with_url();
+            RXreceived = 0;
+        }
+        vTaskDelay(200 / portTICK_PERIOD_MS);
+    }
+    
+}
+
 void app_main()
 {
     /*
@@ -426,6 +456,7 @@ void app_main()
      app_wifi_initialise(&server);
      app_wifi_wait_connected();
      */
+    lightInit();
     adc_init();
     gpio_def();
     uart_init();
@@ -448,12 +479,14 @@ void app_main()
     
     //xTaskCreate(tx_task, "uart_tx_task", 1024*2, NULL, configMAX_PRIORITIES, NULL);
     //xTaskCreate(rx_task, "uart_rx_task", 1024*2, NULL, configMAX_PRIORITIES, NULL);
-    xTaskCreate(lightControl, "lightControl", 1024*4, NULL, configMAX_PRIORITIES, NULL);
-    xTaskCreate(windowControl, "windowControl", 4096, NULL, configMAX_PRIORITIES, NULL);
-    xTaskCreate(temperatureControl, "temperatureControl", 4096, NULL, configMAX_PRIORITIES, NULL);
+    //xTaskCreate(lightControl, "lightControl", 1024*4, NULL, 1, NULL);
+    //xTaskCreate(windowControl, "windowControl", 4096, NULL, 2, NULL);
+    xTaskCreate(temperatureControl, "temperatureControl", 4096, NULL, 3, NULL);
     //xTaskCreate(Post_HTTP_hub, "Post_HTTP_hub", 1024*4, NULL, configMAX_PRIORITIES-1, NULL);
+    //xTaskCreate(update, "update", 4096, NULL, 1, NULL);
     
     while (1) {
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
+
