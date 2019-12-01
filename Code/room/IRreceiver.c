@@ -53,7 +53,7 @@ CONDITIONS OF ANY KIND, either express or implied.
 #define LEDC_TEST_FADE_TIME    (3000)
 
 #define SERVO_MIN_PULSEWIDTH 500 //Minimum pulse width in microsecond
-#define SERVO_MAX_PULSEWIDTH 2500 //Maximum pulse width in microsecond
+#define SERVO_MAX_PULSEWIDTH 2000 //Maximum pulse width in microsecond 2500
 #define SERVO_MAX_DEGREE 180 //Maximum angle in degree upto which servo can rotate
 
 #define DEFAULT_VREF    1100                            //Use adc2_vref_to_gpio() to obtain a better estimate
