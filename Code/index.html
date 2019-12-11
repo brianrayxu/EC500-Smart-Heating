@@ -26,10 +26,12 @@
         var socket = io();
         socket.on('message', function(msg){
             //msg[0] = heat level from thermistor, msg[1] = light level from photoresistor, msg[2] = timestamp
-            var x = document.getElementById("heatmsg");
-            var y = document.getElementById("lightmsg");
-            var print1 = x + msg[0] + " C (Last Measured : " + msg[2] + " )";
-            var print2 = y + msg[1] + " % (Last Measured : " + msg[2] + " )";
+            var date  = new Date();
+            //date = date.toString();
+            document.getElementById("heatmsg").innerHTML = "";
+            document.getElementById("lightmsg").innerHTML = "";
+            var print1 = "Heat Status: " + msg.temp + " C (Last Measured : " + date + " )";
+            var print2 = "Light Status: " + msg.pwm + " % (Last Measured : " + date + " )";
             document.getElementById("heatmsg").innerHTML = print1;
             document.getElementById("lightmsg").innerHTML = print2;
         });
@@ -38,7 +40,7 @@
     function loaddata(){
         
         const Http = new XMLHttpRequest();
-        const url='http://192.168.1.133:3000/water';
+        const url='http://192.168.1.102:3000/water';
         Http.open("POST", url);
         Http.setRequestHeader("Content-Type", "application/json");
         Http.send(JSON.stringify({"state": "0"}));

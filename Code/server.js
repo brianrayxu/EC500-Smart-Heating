@@ -26,7 +26,11 @@ var devPORT = 3333;
 var devHOST = "192.168.1.128"
 
 //MONGODB
+var testname = "kyle";
 const uri = "mongodb+srv://rivicha:abcd@cluster0-udbhw.gcp.mongodb.net/test?retryWrites=true&w=majority";
+
+//user pref
+var temp_pref = 24;
 
 var connector = mongoose.connect(uri, {dbName: 'smartheating'});
 //MongoDB
@@ -36,13 +40,6 @@ var dataSchema = new mongoose.Schema({
   });
 
   var data = mongoose.model('People', dataSchema, 'people');
-
-data.find(function(error, comments){
-})
-  var testname = "brian";
-  data.find({name : testname}, function(error, comments) {
-      console.log(comments);
-  });
 
 
 //API ENDPOINTS/////////////////////////////////////////////////////////////////////////////////////////
@@ -56,27 +53,29 @@ app.get('/', function(req, res){
 app.post('/water', jsonParser, function(req, res){
   //WeatherAPI for outside temp and raining status
   request('http://api.openweathermap.org/data/2.5/weather?q=Boston&APPID=e435e903db94bf859510c2df7c312eb0', { json: true }, (err, res, body) => {
-  if (err) { return console.log(err); }
-  console.log((body.main.temp - 273.15 | 0) + " Degrees Celsius");
-  if(body.weather[0].main == "Rain"){
-    console.log("Its Raining, Dont open Window");//DONT OPEN WINDOW SIGNAL
-    state = "hi";
-    // Send through UDP client
-    console.log("Sending raining and temp")
-    server.send(state,devPORT,devHOST,function(error){
-      if(error){ 
-        console.log('Found device');
-      }
-      else{
-        console.log('Failed to update state');
-        //console.log(error);
-        console.log(state)
-      }
-    });
+    if (err) { return console.log(err); }
+    console.log((body.main.temp - 273.15 | 0) + " Degrees Celsius");
+    let temper = (body.main.temp - 273.15 | 0);
 
-  }
-})
-    res.send("Done")
+    if(body.weather[0].main == "Rain" || (temper > temp_pref + 2 || temper < temp_pref - 2)){ // close window
+      server.send("0",devPORT,devHOST,function(error){
+        if(error){ 
+          console.log('Failed to update state');
+        }else{
+          console.log('Found device');
+        }
+      });
+    } else { // open window
+      server.send("1",devPORT,devHOST,function(error){
+        if(error){ 
+          console.log('Failed to update state');
+        }else{
+          console.log('Found device');
+        }
+      });
+    }
+  })
+    res.send("done");
 });
 
 
@@ -84,19 +83,33 @@ app.post('/water', jsonParser, function(req, res){
 
 // Send sensor readings to frontend and write JSON to local file
 server.on('message', function (message, remote) {
-    console.log(JSON.parse(message.toString()));
-    // Update device port and host
     devPORT = remote.port;
     devHOST = remote.address;
-    server.send("message recieved",devPORT,devHOST,function(error){
-      if(error){
-        console.log('Failed to update state');
-      }
-      else{
-        console.log('Found device');
-      }
+
+    let tempname = JSON.parse(message.toString())
+    console.log(tempname);
+    testname = tempname.fob_id;
+    console.log(testname);
+    if(testname ==  null){
+      io.emit('message',  JSON.parse(message.toString()));
+    }
+    if(testname != null){
+      data.find({name: testname}, function(error, comments){
+        console.log(comments);
+        let tempheatpref = comments[0].heat;
+        console.log(tempheatpref);
+        tempheatpref = tempheatpref.toString();
+        server.send(tempheatpref,devPORT,devHOST,function(error){
+          if(error){
+            console.log('Failed to update state');
+          } else {
+            console.log('Found device');
+          }
+        });
+    })
+
+    }
     });
-});
 
 //HOST, SOCKET, AND EXPRESS INITIALIZATIONS/////////////////////////////////////////////////////////////
 

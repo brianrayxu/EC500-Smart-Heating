@@ -58,7 +58,7 @@ static void interrupt_lock_task() {
         
         //format and send new message
         char msgBuf[100];
-        sprintf(msgBuf, "fob: %s", FOB_ID);
+        sprintf(msgBuf, "brian: %s", FOB_ID);
         sendData("TX_TASK", msgBuf);
         
         vTaskDelay(500/portTICK_RATE_MS);
