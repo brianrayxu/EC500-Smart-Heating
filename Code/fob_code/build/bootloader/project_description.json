@@ -1,0 +1,18 @@
+{
+    "project_name":       "bootloader",
+    "project_path":       "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/bootloader/subproject",
+    "build_dir":          "/Users/kylemartin/Documents/senioryear/fall/EC444/Martin-Kyle/skills/EC500TESTING/fob_code/build/bootloader",
+    "config_file":        "/Users/kylemartin/Documents/senioryear/fall/EC444/Martin-Kyle/skills/EC500TESTING/fob_code/sdkconfig",
+    "config_defaults":    "",
+    "app_elf":            "bootloader.elf",
+    "app_bin":            "bootloader.bin",
+    "git_revision":       "v4.1-dev-141-ga7e8d87d3",
+    "phy_data_partition": "",
+    "monitor_baud" : "115200",
+    "config_environment" : {
+        "COMPONENT_KCONFIGS" : "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/efuse/Kconfig;/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/esp32/Kconfig;/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/esp_common/Kconfig;/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/log/Kconfig;/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/spi_flash/Kconfig",
+        "COMPONENT_KCONFIGS_PROJBUILD" : "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/bootloader/Kconfig.projbuild;/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/esptool_py/Kconfig.projbuild;/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/partition_table/Kconfig.projbuild"
+    },
+    "build_components" : [ "bootloader", "bootloader_support", "efuse", "esp32", "esp_common", "esp_rom", "esptool_py", "log", "main", "micro-ecc", "partition_table", "soc", "spi_flash", "xtensa", "" ],
+    "build_component_paths" : [ "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/bootloader", "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/bootloader_support", "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/efuse", "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/esp32", "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/esp_common", "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/esp_rom", "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/esptool_py", "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/log", "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/bootloader/subproject/main", "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/bootloader/subproject/components/micro-ecc", "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/partition_table", "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/soc", "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/spi_flash", "/Users/kylemartin/Documents/senioryear/fall/EC444/esp-idf/components/xtensa", "" ]
+}

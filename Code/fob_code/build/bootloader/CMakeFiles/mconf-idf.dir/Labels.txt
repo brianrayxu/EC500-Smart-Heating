@@ -1,0 +1,13 @@
+# Target labels
+ mconf-idf
+# Source files and their labels
+/Users/kylemartin/Documents/senioryear/fall/EC444/Martin-Kyle/skills/EC500TESTING/fob_code/build/bootloader/CMakeFiles/mconf-idf
+/Users/kylemartin/Documents/senioryear/fall/EC444/Martin-Kyle/skills/EC500TESTING/fob_code/build/bootloader/CMakeFiles/mconf-idf.rule
+/Users/kylemartin/Documents/senioryear/fall/EC444/Martin-Kyle/skills/EC500TESTING/fob_code/build/bootloader/CMakeFiles/mconf-idf-complete.rule
+/Users/kylemartin/Documents/senioryear/fall/EC444/Martin-Kyle/skills/EC500TESTING/fob_code/build/bootloader/mconf-idf-prefix/src/mconf-idf-stamp/mconf-idf-install.rule
+/Users/kylemartin/Documents/senioryear/fall/EC444/Martin-Kyle/skills/EC500TESTING/fob_code/build/bootloader/mconf-idf-prefix/src/mconf-idf-stamp/mconf-idf-mkdir.rule
+/Users/kylemartin/Documents/senioryear/fall/EC444/Martin-Kyle/skills/EC500TESTING/fob_code/build/bootloader/mconf-idf-prefix/src/mconf-idf-stamp/mconf-idf-download.rule
+/Users/kylemartin/Documents/senioryear/fall/EC444/Martin-Kyle/skills/EC500TESTING/fob_code/build/bootloader/mconf-idf-prefix/src/mconf-idf-stamp/mconf-idf-update.rule
+/Users/kylemartin/Documents/senioryear/fall/EC444/Martin-Kyle/skills/EC500TESTING/fob_code/build/bootloader/mconf-idf-prefix/src/mconf-idf-stamp/mconf-idf-patch.rule
+/Users/kylemartin/Documents/senioryear/fall/EC444/Martin-Kyle/skills/EC500TESTING/fob_code/build/bootloader/mconf-idf-prefix/src/mconf-idf-stamp/mconf-idf-configure.rule
+/Users/kylemartin/Documents/senioryear/fall/EC444/Martin-Kyle/skills/EC500TESTING/fob_code/build/bootloader/mconf-idf-prefix/src/mconf-idf-stamp/mconf-idf-build.rule
