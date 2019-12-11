@@ -12,7 +12,7 @@
 
 static const int RX_BUF_SIZE = 1024;
 
-#define FOB_ID "owner"
+#define FOB_ID "brian"
 
 #define RMT_PIN (GPIO_NUM_26) //A0
 #define TXD_PIN (GPIO_NUM_25) //A1

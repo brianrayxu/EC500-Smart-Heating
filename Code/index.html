@@ -5,52 +5,66 @@
 
 <!-- HTML HEAD -->
 <head>
-	<title>Line Chart</title>
-	<!-- Source for Canvas JS - points to the web - needs internet -->
-	<!-- Source for Socket.io - this one is local -->
-	<script src="/socket.io/socket.io.js"></script>
-
-	<style>
-  	canvas{
-  		-moz-user-select: none;
-  		-webkit-user-select: none;
-  		-ms-user-select: none;
-  	}
-	</style>
+    <title>Smart Heating + Lighting</title>
+    <!-- Source for Canvas JS - points to the web - needs internet -->
+    <!-- Source for Socket.io - this one is local -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 </head>
 
 <body>
-	<!-- HTML layout -->
-  <h1>Smart Key System </h1> <br>
-  <p id="demo">Recent Accesses </p>
-	<div id="message_disp"></div>
-	
-
-	<!-- Script to handle charting -->
-	
-
-	<!-- Script to handle socket and also to update chart datapoints -->
-	<script>
+    <!-- HTML layout -->
+  <h1>Smart Heating and Lighting</h1> <br>
+  <p id="heatmsg">Heat Status: </p>
+  <p id="lightmsg">Light Status: </p>
+    <div id="message_disp"></div>
+    <!-- Script to handle socket and also to update chart datapoints -->
+    <script>
     var timestamp;
     var deviceID;
     var temperature;
-		var socket = io();
-		socket.on('message', function(msg){
-			var x = document.getElementById("demo");
-      		var newp = "Timestamp: " + msg[0] + " FobID:  " + msg[1] + " HubID: " + msg[2];
-      		var print = x.innerHTML;
-      		//var newline = ;
-      		var print = print + "<br />" + newp;
-			document.getElementById("demo").innerHTML = print;
-      // Parse received message from server
-      console.log(msg);
-			//document.getElementById("message_disp").innerHTML =  "Timestamp: " + msg[0] + " FobID:  " + msg[1] + " HubID " + msg[2];
+        var socket = io();
+        socket.on('message', function(msg){
+            //msg[0] = heat level from thermistor, msg[1] = light level from photoresistor, msg[2] = timestamp
+            var x = document.getElementById("heatmsg");
+            var y = document.getElementById("lightmsg");
+            var print1 = x + msg[0] + " C (Last Measured : " + msg[2] + " )";
+            var print2 = y + msg[1] + " % (Last Measured : " + msg[2] + " )";
+            document.getElementById("heatmsg").innerHTML = print1;
+            document.getElementById("lightmsg").innerHTML = print2;
+        });
+    </script>
+    <script>
+    function loaddata(){
+        
+        const Http = new XMLHttpRequest();
+        const url='http://192.168.1.133:3000/water';
+        Http.open("POST", url);
+        Http.setRequestHeader("Content-Type", "application/json");
+        Http.send(JSON.stringify({"state": "0"}));
 
-			// Update data array
-
-		});
-	</script>
-
+        Http.onreadystatechange = (e) => {
+        console.log(Http)
+}
+   /* let xhr = new XMLHttpRequest();
+        xhr.open('post', '/water', true);
+        xhr.responseType = 'text';
+        xhr.send();
+        xhr.onload = function() {
+            let responseObj = xhr.response;
+            dt.load(responseObj);
+        };*/
+}
+$(document).ready(function(e) {
+   
+   
+   
+    window.setInterval(function(){
+        loaddata();
+    },5000);
+});
+    
+    </script>
 </body>
 
 </html>
